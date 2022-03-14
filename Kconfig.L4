@@ -1,0 +1,73 @@
+menu "Tiny system loader"
+
+choice
+	prompt "Verbosity"
+	default TINIT_VERBOSITY_INFO
+	help
+	  Specify debug verbosity of tinit.
+
+config TINIT_VERBOSITY_NONE
+	bool "suppress all messages"
+
+config TINIT_VERBOSITY_ERROR
+	bool "show only errors"
+
+config TINIT_VERBOSITY_INFO
+	bool "show errors+infos"
+
+config TINIT_VERBOSITY_ALL
+	bool "show all messages"
+
+endchoice
+
+choice
+	prompt "Invocation mode"
+	default TINIT_RUN_ROOTTASK
+	help
+	  Choose the mode in which tinit is started by Fiasco.
+
+config TINIT_RUN_SIGMA0
+	bool "sigma0"
+	help
+	  This enables tinit to be run as sigma0 by Fiasco.
+
+config TINIT_RUN_ROOTTASK
+	bool "root task"
+	help
+	  Choose to run tinit as root task.
+
+endchoice
+
+config TINIT_HEAP_SIZE
+	int "Heap size (bytes)"
+	default 512 if BUILD_ARCH_arm
+	default 1024 if BUILD_ARCH_arm64
+	help
+	  Memory that is reserved for dynamic allocations.
+
+	  This is used for child task data structures. Approximately 128 bytes
+	  per child are required.
+
+config TINIT_MAP_DEBUG_CAP
+	bool "Map JDB cap to child tasks"
+	depends on !RELEASE_MODE
+	default y
+	help
+	  Forward the kernel debugger capability to child tasks. This allows
+	  them to name their objects but also to invoke the kernel debugger.
+
+	  Should only be enabled for debug builds.
+
+config TINIT_DYNAMIC_LOADER
+	bool "Dynamically choose child task load address"
+	depends on BID_PIE
+	help
+	  Load child tasks to a dynamically chosen address.
+
+	  This will load applications to the lowest possible address where
+	  enough space is available. This will make sure that applications
+	  are packed as much as possible at the beginning of the RAM. It
+	  also enables multiple loading of the same application without
+	  manually specifying a load offset in the inittab.
+
+endmenu

@@ -1,0 +1,2 @@
+requires: libc_minimal libc_be_minimal_log_io crtn l4sys l4re l4util libsigma0
+Maintainer: jan.kloetzke@kernkonzept.com
