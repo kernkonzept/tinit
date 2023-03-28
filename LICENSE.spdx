@@ -1,0 +1,26 @@
+## This file states the license of this package and possibly its subpackages
+## in machine and human readable format. The PackageName refers to the package
+## whose license is defined by PackageLicenseConcluded.
+## For more information about this file format visit the SPDX website at
+## https://spdx.org
+
+## Document Information
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+DocumentNamespace: spdx:kernkonzept/tinit-723ecfb8-1897-4127-adbe-762df2778e34
+DocumentName: tinit
+SPDXID: SPDXRef-DOCUMENT
+
+## Creation Information
+Created: 2023-03-28T12:00:00Z
+Creator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
+
+## Package Information
+PackageName: tinit
+SPDXID: SPDXRef-tinit
+PackageOriginator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
+PackageLicenseDeclared: GPL-2.0-only
+PackageLicenseConcluded: GPL-2.0-only
+FilesAnalyzed: false
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
