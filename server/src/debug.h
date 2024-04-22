@@ -91,6 +91,6 @@ void l4_debugger_add_image_info(l4_cap_idx_t cap, l4_addr_t base,
 #ifdef NDEBUG
 inline void l4_debugger_set_object_name(l4_cap_idx_t, cxx::String const &)
 {}
-void l4_debugger_add_image_info(l4_cap_idx_t, l4_addr_t, cxx::String const &)
+inline void l4_debugger_add_image_info(l4_cap_idx_t, l4_addr_t, cxx::String const &)
 {}
 #endif
