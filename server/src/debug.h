@@ -25,19 +25,14 @@
 #define ENABLE_DEBUG
 #endif
 
-struct Debug
-{
-  static int printf_impl(char const *fmt, ...);
-};
-
-struct Fatal : Debug
+struct Fatal
 {
   static int L4_NORETURN abort(char const *msg);
 
 #ifdef ENABLE_ERRORS
-  int printf(char const *fmt, ...) const
-    __attribute__((format(printf,2,3)))
-  { return printf_impl(fmt, __builtin_va_arg_pack()); }
+  template<typename... Args>
+  int printf(char const *fmt, Args... args) const
+  { return dprintf(1, fmt, args...); }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -45,12 +40,12 @@ struct Fatal : Debug
 #endif
 };
 
-struct Err : Debug
+struct Err
 {
 #ifdef ENABLE_ERRORS
-  int printf(char const *fmt, ...) const
-    __attribute__((format(printf,2,3)))
-  { return printf_impl(fmt, __builtin_va_arg_pack()); }
+  template<typename... Args>
+  int printf(char const *fmt, Args... args) const
+  { return dprintf(1, fmt, args...); }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -58,12 +53,12 @@ struct Err : Debug
 #endif
 };
 
-struct Info : Debug
+struct Info
 {
 #ifdef ENABLE_INFO
-  int printf(char const *fmt, ...) const
-    __attribute__((format(printf,2,3)))
-  { return printf_impl(fmt, __builtin_va_arg_pack()); }
+  template<typename... Args>
+  int printf(char const *fmt, Args... args) const
+  { return dprintf(1, fmt, args...); }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -71,12 +66,12 @@ struct Info : Debug
 #endif
 };
 
-struct Dbg : Debug
+struct Dbg
 {
 #ifdef ENABLE_DEBUG
-  int printf(char const *fmt, ...) const
-    __attribute__((format(printf,2,3)))
-  { return printf_impl(fmt, __builtin_va_arg_pack()); }
+  template<typename... Args>
+  int printf(char const *fmt, Args... args) const
+  { return dprintf(1, fmt, args...); }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))

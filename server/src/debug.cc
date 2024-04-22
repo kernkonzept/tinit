@@ -6,24 +6,11 @@
  */
 
 #include <l4/sys/debugger.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "debug.h"
-
-int Debug::printf_impl(char const *fmt, ...)
-{
-  int n;
-  va_list args;
-
-  va_start    (args, fmt);
-  n = vdprintf (1, fmt, args);
-  va_end      (args);
-
-  return n;
-}
 
 int Fatal::abort(char const *msg)
 {
