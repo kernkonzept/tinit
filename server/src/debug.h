@@ -27,7 +27,7 @@
 
 struct Fatal
 {
-  static int L4_NORETURN abort(char const *msg);
+  static void L4_NORETURN abort(char const *msg);
 
 #ifdef ENABLE_ERRORS
   template<typename... Args>

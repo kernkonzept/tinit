@@ -12,7 +12,7 @@
 
 #include "debug.h"
 
-int Fatal::abort(char const *msg)
+void Fatal::abort(char const *msg)
 {
   write(2, "FATAL: ", 7);
   write(2, msg, strlen(msg));
