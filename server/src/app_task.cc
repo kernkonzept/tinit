@@ -148,7 +148,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
 
   // Creating the task on no-MMU systems will adjust the utcb flexpage to the
   // allocated address.
-  auto ret = e->factory()->create_task(_task, _utcb);
+  auto ret = e->factory()->create_task(_task, &_utcb);
   if (l4_error(ret) < 0)
     Fatal().abort("create_task failed\n");
 
