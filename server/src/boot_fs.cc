@@ -51,8 +51,7 @@ s0_request_ram(l4_addr_t s, l4_addr_t, int order)
   b->bdr   = 0;
   b->br[0] = L4_ITEM_MAP;
   b->br[1] = l4_fpage(s, order, L4_FPAGE_RWX).raw;
-  tag = l4_ipc_call(Sigma0_cap, l4_utcb(), tag, L4_IPC_NEVER);
-  return 0;
+  return l4_error(l4_ipc_call(Sigma0_cap, l4_utcb(), tag, L4_IPC_NEVER));
 }
 #endif
 
@@ -78,8 +77,9 @@ char const *Boot_fs::find(cxx::String const &name, l4_size_t *size)
         *size = end - start;
 
 #ifdef CONFIG_TINIT_RUN_ROOTTASK
-      end = l4_round_page(end);
-      l4util_splitlog2_hdl(start, end, s0_request_ram);
+      end = l4_round_page(end) - 1U; // address is inclusive
+      if (l4util_splitlog2_hdl(start, end, s0_request_ram) < 0)
+        return nullptr;
 #else
       l4_touch_ro(reinterpret_cast<void *>(start), end - start);
 #endif
