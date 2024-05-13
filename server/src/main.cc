@@ -247,7 +247,7 @@ private:
     unsigned long prio = 0xfe;
 
     cxx::String arg;
-    while (!(arg = pop_arg(&line)).empty())
+    while (arg = pop_arg(&line), !arg.empty())
       {
         bool ok = false;
 
@@ -295,7 +295,7 @@ private:
       return false;
 
     cxx::String arg;
-    while (!(arg = pop_arg(&line)).empty())
+    while (arg = pop_arg(&line), !arg.empty())
       {
         bool ok = false;
 
@@ -448,7 +448,7 @@ private:
       return false;
 
     cxx::String arg;
-    while (!(arg = pop_arg(&line)).empty())
+    while (arg = pop_arg(&line), !arg.empty())
       {
         bool ok = false;
 
@@ -520,7 +520,7 @@ private:
       return false;
 
     cxx::String arg;
-    while (!(arg = pop_arg(&line)).empty())
+    while (arg = pop_arg(&line), !arg.empty())
       {
         bool ok = false;
 
