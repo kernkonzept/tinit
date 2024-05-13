@@ -85,9 +85,8 @@ static char *num2hex(char *s, unsigned long n)
   static char hex[] = "0123456789abcdef";
 
   // determine number of digits
-  unsigned d = 1;
-  while (n >> d*4)
-    d++;
+  unsigned d = 8*sizeof(n) - __builtin_clzl(n | 1) - 1;
+  d = (d >> 2) + 1;
 
   for (int i = d-1; i >= 0; i--)
     *s++ = hex[(n >> i*4) & 0x0fU];
