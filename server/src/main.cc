@@ -37,7 +37,7 @@ static void find_kip()
   l4_global_kip = l4sigma0_map_kip(Sigma0_cap, 0, L4_WHOLE_ADDRESS_SPACE);
 #endif
   if (!l4_global_kip)
-    Fatal().abort("no KIP\n");
+    Fatal().panic("no KIP\n");
 
   Dbg().printf("KIP @%p\n", l4_kip());
 }
@@ -200,7 +200,7 @@ public:
       {
         Fatal().printf("Offending line: %u: %.*s %.*s\n", _line,
                        kw.len(), kw.start(), line.len(), line.start());
-        Fatal().abort("Invalid inittab\n");
+        Fatal().panic("Invalid inittab\n");
       }
   }
 
@@ -369,7 +369,7 @@ private:
     auto cap = Util::cap_alloc.alloc<void>();
     L4::Cap<L4::Factory> factory(L4_BASE_FACTORY_CAP);
     if (l4_error(factory->create_gate(cap, L4::Cap<L4::Thread>(), 0)) < 0)
-      Fatal().abort("Cannot create gate\n");
+      Fatal().panic("Cannot create gate\n");
 
     _channels.add(new Channel(name, cap));
 
@@ -468,7 +468,7 @@ private:
         // create a new thread
         auto thread = Util::cap_alloc.alloc<L4::Thread>();
         if (l4_error(L4Re::Env::env()->factory()->create(thread)) < 0)
-          Fatal().abort("create_thread failed\n");
+          Fatal().panic("create_thread failed\n");
 
         // Schedule already with chosen priority. Will only run after tvmm
         // has called ex_regs().
@@ -737,7 +737,7 @@ int main(int, char**)
 
 #ifdef CONFIG_TINIT_RUN_ROOTTASK
   if (l4_kip()->node != 0)
-    Fatal().abort("Cannot run as roottask on AMP!\n");
+    Fatal().panic("Cannot run as roottask on AMP!\n");
 #endif
 
 #ifndef NDEBUG

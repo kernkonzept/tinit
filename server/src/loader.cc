@@ -96,7 +96,7 @@ Child_task::map_to_task(l4_addr_t local, l4_addr_t dest, l4_addr_t size,
           Fatal().printf("map_to_task(0x%lx, 0x%0lx, %lu, %d): failed for "
                          "0x%lx/%d -> %lx: %d\n", local, dest, size, rights,
                          local + offs, ps, doffs, err);
-          Fatal().abort("task->map failed\n");
+          Fatal().panic("task->map failed\n");
         }
       offs += l4_addr_t{1} << ps;
     }

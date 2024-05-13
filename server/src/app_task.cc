@@ -71,7 +71,7 @@ void App_task::push_named_cap(cxx::String const &name, L4::Cap<void> cap,
 
   if (l4_error(_task->map(L4Re::This_task, cap.fpage(rights | L4_CAP_FPAGE_RO),
                     L4::Cap<void>(idx).snd_base() | (rights & 0xf0U))) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
   l4re_env_cap_entry_t e;
   e.cap = idx;
@@ -150,25 +150,25 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
   // allocated address.
   auto ret = e->factory()->create_task(_task, &_utcb);
   if (l4_error(ret) < 0)
-    Fatal().abort("create_task failed\n");
+    Fatal().panic("create_task failed\n");
 
   ret = e->factory()->create(_thread);
   if (l4_error(ret) < 0)
-    Fatal().abort("create_thread failed\n");
+    Fatal().panic("create_thread failed\n");
 
   l4_debugger_set_object_name(_task.cap(), arg0);
   l4_debugger_set_object_name(_thread.cap(), arg0);
 
   void const *f = Boot_fs::find(arg0);
   if (!f)
-    Fatal().abort("App_task: file missing\n");
+    Fatal().panic("App_task: file missing\n");
 
   Loader::Elf_binary elf(f);
   if (!elf.is_valid())
-    Fatal().abort("App_task: invalid ELF file\n");
+    Fatal().panic("App_task: invalid ELF file\n");
 
   if (!dynamic_reloc(elf, &reloc, l4_kip()->node))
-    Fatal().abort("Loader OOM\n");
+    Fatal().panic("Loader OOM\n");
 
   bool neg = reloc >= ~l4_addr_t{0} / 2U;
   Info().printf("Loading '%.*s', offset %c0x%lx\n", arg0.len(), arg0.start(),
@@ -207,7 +207,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
                 fatal.printf("Failed to load ELF kernel binary. "
                              "Region [0x%lx/0x%lx] not available.\n",
                              ph.paddr(), size);
-                fatal.abort("Cannot load app section\n");
+                fatal.panic("Cannot load app section\n");
               }
 #endif
             Dbg().printf("Copy in ELF binary section @0x%lx/0x%lx from 0x%lx/0x%lx\n",
@@ -277,7 +277,7 @@ App_task& App_task::map(l4_addr_t base, l4_size_t size)
 App_task& App_task::map_mmio(l4_addr_t base, l4_size_t size)
 {
   if (!Page_alloc::map_iomem(base, size))
-    Fatal().abort("map iomem");
+    Fatal().panic("map iomem");
 
   map_to_task(base, base, size, L4_FPAGE_RW, L4_FPAGE_UNCACHEABLE << 4);
 
@@ -288,7 +288,7 @@ App_task& App_task::map_shm(l4_addr_t base, l4_size_t size)
 {
   size = l4_round_page(size);
   if (!Page_alloc::share_ram(base, size))
-    Fatal().abort("shm not available\n");
+    Fatal().panic("shm not available\n");
 
   map_to_task(base, base, size, L4_FPAGE_RW, L4_FPAGE_BUFFERABLE << 4);
 
@@ -361,33 +361,33 @@ void App_task::start()
   // Map known caps
   if (l4_error(_task->map(L4_BASE_TASK_CAP, _known_caps[Cap_log],
                           env->log().snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
   if (l4_error(_task->map(L4_BASE_TASK_CAP, _known_caps[Cap_factory],
                           env->factory().snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
   if (l4_error(_task->map(L4_BASE_TASK_CAP, _known_caps[Cap_scheduler],
                           env->scheduler().snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
   // We are the parent
   if (l4_error(_task->map(L4_BASE_TASK_CAP, obj_cap().fpage(L4_CAP_FPAGE_RW),
                           env->parent().snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
   // Give child access to its task and thread object
   if (l4_error(_task->map(L4_BASE_TASK_CAP, _task.fpage(L4_CAP_FPAGE_RWSD),
                           L4::Cap<L4::Task>(L4Re::This_task).snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
   if (l4_error(_task->map(L4_BASE_TASK_CAP, _thread.fpage(L4_CAP_FPAGE_RWSD),
                           env->main_thread().snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 
 #ifdef CONFIG_TINIT_MAP_DEBUG_CAP
   L4::Cap<void> jdb(L4_BASE_DEBUGGER_CAP);
   if (l4_error(_task->map(L4_BASE_TASK_CAP, jdb.fpage(), jdb.snd_base())) < 0)
-    Fatal().abort("map cap failed\n");
+    Fatal().panic("map cap failed\n");
 #endif
 
   // The main thread is it's own pager. Thus it will halt on a page fault!
@@ -396,7 +396,7 @@ void App_task::start()
   th_attr.exc_handler(env->main_thread());
   th_attr.bind(reinterpret_cast<l4_utcb_t*>(l4_fpage_memaddr(_utcb)), _task);
   if (l4_error(_thread->control(th_attr)) < 0)
-    Fatal().abort("thread control failed\n");
+    Fatal().panic("thread control failed\n");
 
   // Let's go...
   l4_sched_param_t sched_param = l4_sched_param(_prio);

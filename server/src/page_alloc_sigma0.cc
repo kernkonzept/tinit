@@ -87,7 +87,7 @@ public:
         if (i->end < start)
           spot = i;
         else if (i->start <= end)
-          Fatal().abort("Region collision");
+          Fatal().panic("Region collision");
       }
 
     Range *n = alloc_range(start, end);

@@ -68,7 +68,7 @@ public:
               fatal.printf("Failed to load ELF kernel binary. "
                            "Region [0x%lx/0x%lx] not in RAM.\n",
                            map_dest, map_size);
-              fatal.abort("Cannot load vm image\n");
+              fatal.panic("Cannot load vm image\n");
             }
 
           Dbg().printf("Copy in ELF binary section @0x%lx from 0x%lx/0x%lx\n",
@@ -96,7 +96,7 @@ Vm_task::Vm_task(cxx::String const &name)
   auto ret = e->factory()->create(_task, L4_PROTO_VM);
 
   if (l4_error(ret) < 0)
-    Fatal().abort("Cannot create guest VM. Virtualization support may be missing.\n");
+    Fatal().panic("Cannot create guest VM. Virtualization support may be missing.\n");
 
   l4_debugger_set_object_name(_task.cap(), name);
 }
@@ -106,7 +106,7 @@ Vm_task::map_ram(l4_addr_t base, l4_size_t size, l4_addr_t off)
 {
   size = l4_round_page(size);
   if (!Page_alloc::reserve_ram(base + off, size))
-    Fatal().abort("Vm_task: ram not available\n");
+    Fatal().panic("Vm_task: ram not available\n");
 
   map_to_task(base, base, size);
 
@@ -119,7 +119,7 @@ Vm_task&
 Vm_task::map_mmio(l4_addr_t base, l4_size_t size)
 {
   if (!Page_alloc::map_iomem(base, size))
-    Fatal().abort("map iomem");
+    Fatal().panic("map iomem");
 
   map_to_task(base, base, size, L4_FPAGE_RW, L4_FPAGE_UNCACHEABLE << 4);
 
@@ -131,7 +131,7 @@ Vm_task::map_shm(l4_addr_t base, l4_size_t size)
 {
   size = l4_round_page(size);
   if (!Page_alloc::share_ram(base, size))
-    Fatal().abort("Vm_task: shm not available\n");
+    Fatal().panic("Vm_task: shm not available\n");
 
   map_to_task(base, base, size);
 
@@ -148,12 +148,12 @@ Vm_task::load(cxx::String const &name, l4_addr_t *entry)
     {
       Fatal().printf("vm: cannot find image '%.*s'\n", name.len(),
                      name.start());
-      Fatal().abort("vm: file missing\n");
+      Fatal().panic("vm: file missing\n");
     }
 
   Binary image(f);
   if (!image.is_elf_binary())
-    Fatal().abort("Vm_task: no elf file\n");
+    Fatal().panic("Vm_task: no elf file\n");
 
   *entry = image.load_as_elf(_ram);
 
@@ -172,7 +172,7 @@ Vm_task::set_asid(l4_umword_t asid)
 #else
   static_cast<void>(asid);
 #endif
-    Fatal().abort("Cannot set VMID.\n");
+    Fatal().panic("Cannot set VMID.\n");
 
   return *this;
 }
