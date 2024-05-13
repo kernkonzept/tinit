@@ -322,10 +322,10 @@ void Page_alloc::add_pool(unsigned long address, unsigned long size,
   ram.add_pool(address, size, nodes);
 }
 
-void *Page_alloc::alloc_ram(unsigned long size, unsigned long align,
-                            unsigned node)
+unsigned long Page_alloc::alloc_ram(unsigned long size, unsigned long align,
+                                    unsigned node)
 {
-  return (void *)ram.alloc(size, align, node);
+  return ram.alloc(size, align, node);
 }
 
 bool Page_alloc::reserve_ram(unsigned long address, unsigned long size)

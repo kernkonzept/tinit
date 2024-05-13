@@ -22,14 +22,15 @@ void
 Vm_task::Ram_area::copy_from(void const *from, l4_addr_t offset, l4_addr_t dest,
                              l4_size_t size) const
 {
-  memcpy((void *)(dest + off), (char const *)from + offset, size);
+  memcpy(reinterpret_cast<void *>(dest + off),
+         reinterpret_cast<char const *>(from) + offset, size);
   l4_cache_coherent(dest + off, dest + size);
 }
 
 void
 Vm_task::Ram_area::clear(l4_addr_t dest, l4_size_t size) const
 {
-  memset((void *)(dest + off), 0, size);
+  memset(reinterpret_cast<void *>(dest + off), 0, size);
   l4_cache_coherent(dest + off, dest + size);
 }
 

@@ -47,7 +47,7 @@ void *malloc(size_t size)
   if (heap_pos > __heap_end)
     Fatal().abort("OOM\n");
 
-  return (void *)ret;
+  return reinterpret_cast<void *>(ret);
 }
 
 void free(void *)

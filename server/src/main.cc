@@ -60,7 +60,7 @@ static void init_env()
 }
 
 static __attribute__((used, section(".preinit_array")))
-   const void *pre_init_env = (void *)init_env;
+   void (* pre_init_env)() = &init_env;
 
 #ifdef CONFIG_BID_PIE
 static inline unsigned long elf_machine_dynamic()
@@ -656,7 +656,7 @@ private:
     auto name = pop_arg(&line);
 
     l4_size_t size = 0;
-    void *file = Boot_fs::find(name, &size);
+    char const *file = Boot_fs::find(name, &size);
     if (!file)
       {
         Err().printf("File not found: %.*s\n", name.len(), name.start());
@@ -665,10 +665,10 @@ private:
 
     Dbg().printf("    reload '%.*s' 0x%p\n", name.len(), name.start(), file);
 
-    _app->map((l4_addr_t)file, size);
+    _app->map(reinterpret_cast<l4_addr_t>(file), size);
 
     char arg_buf[16] = "L0x";
-    char *arg_end = num2hex(&arg_buf[3], (l4_addr_t)file);
+    char *arg_end = num2hex(&arg_buf[3], reinterpret_cast<l4_addr_t>(file));
     _app->arg(cxx::String(arg_buf, arg_end));
     return true;
   }
@@ -702,7 +702,7 @@ private:
 static void parse_inittab()
 {
   l4_size_t size = 0;
-  char const *inittab_str = (char const *)Boot_fs::find("inittab", &size);
+  char const *inittab_str = Boot_fs::find("inittab", &size);
   if (!inittab_str)
     {
       Err().printf("No inittab!\n");

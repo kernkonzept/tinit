@@ -45,7 +45,10 @@ class App_task :
     { return src; }
 
     void align(l4_addr_t size)
-    { _back = (char *)((l4_addr_t)_back & ~(size - 1U)); }
+    {
+      _back = reinterpret_cast<char *>(
+        reinterpret_cast<l4_addr_t>(_back) & ~(size - 1U));
+    }
 
     void add_arg(cxx::String const &arg);
     l4_addr_t pack();

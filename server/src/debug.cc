@@ -24,8 +24,9 @@ void l4_debugger_set_object_name(l4_cap_idx_t cap, cxx::String const &name)
 {
   char dbg[16];
   memset(dbg, 0, sizeof(dbg));
-  memcpy(&dbg, name.start(), (unsigned)name.len() >= sizeof(dbg)
-                             ? sizeof(dbg) - 1 : name.len());
+  unsigned name_len = static_cast<unsigned>(name.len());
+  memcpy(&dbg, name.start(), name_len >= sizeof(dbg)
+                             ? sizeof(dbg) - 1 : name_len);
   l4_debugger_set_object_name(cap, dbg);
 }
 
@@ -34,8 +35,9 @@ void l4_debugger_add_image_info(l4_cap_idx_t cap, l4_addr_t base,
 {
   char dbg[16];
   memset(dbg, 0, sizeof(dbg));
-  memcpy(&dbg, name.start(), (unsigned)name.len() >= sizeof(dbg)
-                             ? sizeof(dbg) - 1 : name.len());
+  unsigned name_len = static_cast<unsigned>(name.len());
+  memcpy(&dbg, name.start(), name_len >= sizeof(dbg)
+                             ? sizeof(dbg) - 1 : name_len);
   l4_debugger_add_image_info(cap, base, dbg);
 }
 #endif

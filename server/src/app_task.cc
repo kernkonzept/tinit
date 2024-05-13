@@ -23,8 +23,8 @@ App_task::Stack::Stack()
 
 void App_task::Stack::init(void *bottom, l4_size_t size)
 {
-  _bottom = (char *)bottom;
-  _top = (char *)bottom + size;
+  _bottom = reinterpret_cast<char *>(bottom);
+  _top = _bottom + size;
   _front = _bottom;
   _back = _top;
 
@@ -43,9 +43,9 @@ void App_task::Stack::add_arg(cxx::String const &arg)
 l4_addr_t App_task::Stack::pack()
 {
   l4_size_t len = _front - _bottom;
-  char *dest = (char *)(((l4_umword_t)_back - len) & ~15UL);
-  memmove(dest, _bottom, len);
-  return (l4_addr_t)dest;
+  l4_addr_t dest = (reinterpret_cast<l4_addr_t>(_back) - len) & ~l4_addr_t{15};
+  memmove(reinterpret_cast<char *>(dest), _bottom, len);
+  return dest;
 }
 
 char *App_task::Stack::add_object(void const *src, unsigned long size)
@@ -59,7 +59,7 @@ char *App_task::Stack::add_object(void const *src, unsigned long size)
 char *App_task::Stack::push_object(void const *src, unsigned long size)
 {
   _back -= size;
-  return (char *)memcpy(_back, src, size);
+  return reinterpret_cast<char *>(memcpy(_back, src, size));
 }
 
 
@@ -77,8 +77,9 @@ void App_task::push_named_cap(cxx::String const &name, L4::Cap<void> cap,
   e.cap = idx;
   e.flags = 0;
   memset(&e.name, 0, sizeof(e.name));
+  unsigned name_len = static_cast<unsigned>(name.len());
   memcpy(&e.name, name.start(),
-         (unsigned)name.len() > sizeof(e.name) ? sizeof(e.name) : name.len());
+         name_len > sizeof(e.name) ? sizeof(e.name) : name_len);
 
   *_named_caps-- = e;
 }
@@ -112,8 +113,7 @@ bool App_task::dynamic_reloc(Loader::Elf_binary &elf, l4_addr_t *reloc,
       task_align = ph.align();
   });
 
-  l4_addr_t base = (l4_addr_t)Page_alloc::alloc_ram(task_max - task_min,
-                                                    task_align, node);
+  l4_addr_t base = Page_alloc::alloc_ram(task_max - task_min, task_align, node);
   if (!base)
     {
       Fatal().printf("Could not allocate %lu bytes with alignment 0x%lx\n",
@@ -124,9 +124,9 @@ bool App_task::dynamic_reloc(Loader::Elf_binary &elf, l4_addr_t *reloc,
 
   *reloc = base - task_min;
 #else
-  (void)elf;
-  (void)reloc;
-  (void)node;
+  static_cast<void>(elf);
+  static_cast<void>(reloc);
+  static_cast<void>(node);
 #endif
   return true;
 }
@@ -170,7 +170,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
   if (!dynamic_reloc(elf, &reloc, l4_kip()->node))
     Fatal().abort("Loader OOM\n");
 
-  bool neg = reloc >= ~(l4_addr_t)0 / 2U;
+  bool neg = reloc >= ~l4_addr_t{0} / 2U;
   Info().printf("Loading '%.*s', offset %c0x%lx\n", arg0.len(), arg0.start(),
                 neg ? '-' : '+', neg ? (~reloc + 1U) : reloc);
 
@@ -178,7 +178,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
 
   _num_phdrs = elf.num_phdrs();
   elf.iterate_phdr([this, reloc](Loader::Elf_phdr ph, void const *f) {
-    char *src = (char *)f + ph.offset();
+    char const *src = reinterpret_cast<char const *>(f) + ph.offset();
     if (ph.type() == PT_LOAD)
       {
         l4_addr_t dest = ph.paddr() + reloc;
@@ -193,7 +193,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
           flags |= L4_FPAGE_X;
 
         if (!(flags & L4_FPAGE_W) && ph.memsz() <= ph.filesz()
-            && src == (void *)dest)
+            && src == reinterpret_cast<char const *>(dest))
           {
             // XIP
             Dbg().printf("Map ELF binary @0x%lx/0x%lx\n", dest, size);
@@ -213,8 +213,9 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
             Dbg().printf("Copy in ELF binary section @0x%lx/0x%lx from 0x%lx/0x%lx\n",
                          dest, size, ph.offset(), ph.filesz());
 
-            memcpy((void *)dest, src, ph.filesz());
-            memset((void *)(dest + ph.filesz()), 0, size - ph.filesz());
+            memcpy(reinterpret_cast<void *>(dest), src, ph.filesz());
+            memset(reinterpret_cast<void *>(dest + ph.filesz()), 0,
+                   size - ph.filesz());
           }
 
         map_to_task(dest, dest, size, flags);
@@ -230,10 +231,12 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
           {
             if (e->type == L4RE_ELF_AUX_T_EX_REGS_FLAGS)
               {
-                l4re_elf_aux_mword_t const *v = (l4re_elf_aux_mword_t const *)e;
+                l4re_elf_aux_mword_t const *v
+                  = reinterpret_cast<l4re_elf_aux_mword_t const *>(e);
                 _ex_regs_flags = v->value;
               }
-            e = (l4re_elf_aux_t const *)((char const *)e + e->length);
+            e = reinterpret_cast<l4re_elf_aux_t const *>(
+              reinterpret_cast<char const *>(e) + e->length);
           }
       }
     else if (ph.type() == PT_L4_STACK)
@@ -241,7 +244,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
         l4_addr_t dest = ph.paddr() + reloc;
         l4_addr_t size = l4_round_page(ph.memsz());
         if (size > 0)
-          _stack.init((void *)dest, size);
+          _stack.init(reinterpret_cast<void *>(dest), size);
       }
   });
   _entry = elf.entry() + reloc;
@@ -257,7 +260,8 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
    *   <bottom> <gap> [argc][argv][envv][auxv][L4Re Env][caps][args][arg0]<top>
    */
   assert(_stack.top());
-  _named_caps = (l4re_env_cap_entry_t *)(_stack.bottom() + _stack.size() / 2U);
+  _named_caps = reinterpret_cast<l4re_env_cap_entry_t *>(_stack.bottom()
+                                                         + _stack.size() / 2U);
   _named_caps_end = _named_caps;
 
   _stack.add_arg(arg0);
@@ -390,7 +394,7 @@ void App_task::start()
   L4::Thread::Attr th_attr;
   th_attr.pager(env->main_thread());
   th_attr.exc_handler(env->main_thread());
-  th_attr.bind((l4_utcb_t*)l4_fpage_memaddr(_utcb), _task);
+  th_attr.bind(reinterpret_cast<l4_utcb_t*>(l4_fpage_memaddr(_utcb)), _task);
   if (l4_error(_thread->control(th_attr)) < 0)
     Fatal().abort("thread control failed\n");
 
@@ -425,9 +429,9 @@ App_task::reserve_ram(cxx::String const &arg0, l4_addr_t reloc, unsigned node)
         if (!size)
           return;
 
-        char *src = (char *)f + ph.offset();
+        char const *src = reinterpret_cast<char const *>(f) + ph.offset();
         if ((ph.flags() & PF_W) || ph.memsz() > ph.filesz()
-            || src != (void *)dest)
+            || src != reinterpret_cast<char const *>(dest))
           {
             if (!Page_alloc::reserve_ram(dest, size))
               ret = false;

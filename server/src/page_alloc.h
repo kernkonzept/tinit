@@ -15,8 +15,8 @@ struct Page_alloc
 
   static void add_pool(unsigned long address, unsigned long size,
                        unsigned long nodes);
-  static void *alloc_ram(unsigned long size, unsigned long align,
-                         unsigned node);
+  static unsigned long alloc_ram(unsigned long size, unsigned long align,
+                                 unsigned node);
   static bool reserve_ram(unsigned long address, unsigned long size);
   static bool share_ram(unsigned long address, unsigned long size);
   static bool map_iomem(unsigned long address, unsigned long size);

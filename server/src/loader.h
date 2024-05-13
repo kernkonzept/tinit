@@ -20,8 +20,11 @@ private:
 
 public:
   Elf_phdr(void const *hdr, bool _64) : _hdr(hdr), _64(_64) {}
-  Elf32_Phdr const *hdr32() const { return (Elf32_Phdr const*)(_hdr); }
-  Elf64_Phdr const *hdr64() const { return (Elf64_Phdr const*)(_hdr); }
+
+  Elf32_Phdr const *hdr32() const
+  { return reinterpret_cast<Elf32_Phdr const*>(_hdr); }
+  Elf64_Phdr const *hdr64() const
+  { return reinterpret_cast<Elf64_Phdr const*>(_hdr); }
 
   char const *phdr_type() const;
   unsigned long type() const { return _64?hdr64()->p_type:hdr32()->p_type; }
@@ -44,14 +47,10 @@ private:
   unsigned short e_machine;
   unsigned e_version;
 public:
-  template< typename T >
-  T element(unsigned long offset) const
-  { return reinterpret_cast<T>((unsigned long)this + offset); }
-
   bool is_valid() const
   {
-    return    l4util_elf_check_magic((ElfW(Ehdr) *)this)
-           && l4util_elf_check_arch((ElfW(Ehdr) *)this);
+    return    l4util_elf_check_magic(reinterpret_cast<ElfW(Ehdr) const *>(this))
+           && l4util_elf_check_arch(reinterpret_cast<ElfW(Ehdr) const *>(this));
   }
 
   bool is_64() const
@@ -60,8 +59,11 @@ public:
   }
 
 private:
-  Elf64_Ehdr const *hdr64() const { return (Elf64_Ehdr*)this; }
-  Elf32_Ehdr const *hdr32() const { return (Elf32_Ehdr*)this; }
+  Elf64_Ehdr const *hdr64() const
+  { return reinterpret_cast<Elf64_Ehdr const *>(this); }
+
+  Elf32_Ehdr const *hdr32() const
+  { return reinterpret_cast<Elf32_Ehdr const *>(this); }
 
 public:
 

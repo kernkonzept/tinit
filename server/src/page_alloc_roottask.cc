@@ -61,7 +61,7 @@ void Page_alloc::init()
           if (addr < min_addr) min_addr = addr;
           if (addr + size > max_addr) max_addr = addr + size - 1U;
 
-          pa.free((void*)addr, size, true);
+          pa.free(reinterpret_cast<void *>(addr), size, true);
         }
     }
 }
@@ -72,14 +72,15 @@ void Page_alloc::add_pool(unsigned long address, unsigned long size,
   pool = new Pool(address, address + size - 1U, pool);
 }
 
-void *Page_alloc::alloc_ram(unsigned long size, unsigned long align, unsigned)
+unsigned long Page_alloc::alloc_ram(unsigned long size, unsigned long align,
+                                    unsigned)
 {
   void *ret = 0;
 
   for (Pool const *p = pool ? pool : &whole_ram; p && !ret; p = p->next)
     ret = pa.alloc(size, align, p->start, p->end);
 
-  return ret;
+  return reinterpret_cast<unsigned long>(ret);
 }
 
 bool Page_alloc::reserve_ram(unsigned long address, unsigned long size)

@@ -56,16 +56,19 @@ s0_request_ram(l4_addr_t s, l4_addr_t, int order)
 }
 #endif
 
-void *Boot_fs::find(cxx::String const &name, l4_size_t *size)
+char const *Boot_fs::find(cxx::String const &name, l4_size_t *size)
 {
-  l4util_l4mod_info const *mbi = (l4util_l4mod_info const *)l4_kip()->user_ptr;
-  l4util_l4mod_mod const *modules = (l4util_l4mod_mod const *)mbi->mods_addr;
+  l4util_l4mod_info const *mbi
+    = reinterpret_cast<l4util_l4mod_info const *>(l4_kip()->user_ptr);
+  l4util_l4mod_mod const *modules
+    = reinterpret_cast<l4util_l4mod_mod const *>(mbi->mods_addr);
   unsigned num_modules = mbi->mods_count;
 
   for (unsigned mod = 2; mod < num_modules; ++mod)
     {
       cxx::String opts;
-      cxx::String mod_name = cmdline_to_name((char const *)modules[mod].cmdline);
+      cxx::String mod_name
+        = cmdline_to_name(reinterpret_cast<char const *>(modules[mod].cmdline));
       if (mod_name != name)
         continue;
 
@@ -78,9 +81,9 @@ void *Boot_fs::find(cxx::String const &name, l4_size_t *size)
       end = l4_round_page(end);
       l4util_splitlog2_hdl(start, end, s0_request_ram);
 #else
-      l4_touch_ro((void *)start, end - start);
+      l4_touch_ro(reinterpret_cast<void *>(start), end - start);
 #endif
-      return (void *)start;
+      return reinterpret_cast<char const *>(start);
     }
 
   return nullptr;

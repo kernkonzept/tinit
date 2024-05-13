@@ -12,5 +12,5 @@
 
 struct Boot_fs
 {
-  static void *find(cxx::String const &name, l4_size_t *size = nullptr);
+  static char const *find(cxx::String const &name, l4_size_t *size = nullptr);
 };

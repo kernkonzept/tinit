@@ -98,7 +98,7 @@ Child_task::map_to_task(l4_addr_t local, l4_addr_t dest, l4_addr_t size,
                          local + offs, ps, doffs, err);
           Fatal().abort("task->map failed\n");
         }
-      offs += (l4_addr_t)1 << ps;
+      offs += l4_addr_t{1} << ps;
     }
 }
 
