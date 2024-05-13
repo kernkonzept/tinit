@@ -17,10 +17,6 @@
 #include "ex_regs_flags"
 #include "page_alloc.h"
 
-App_task::Stack::Stack()
-: _bottom(0), _top(0)
-{}
-
 void App_task::Stack::init(void *bottom, l4_size_t size)
 {
   _bottom = reinterpret_cast<char *>(bottom);

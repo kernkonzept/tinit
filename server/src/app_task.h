@@ -25,7 +25,6 @@ class App_task :
   class Stack
   {
   public:
-    Stack();
     void init(void *bottom, l4_size_t size);
 
     template< typename T >
@@ -63,7 +62,10 @@ class App_task :
 
     l4_umword_t &argc() { return *reinterpret_cast<l4_umword_t*>(_bottom); }
 
-    char *_bottom, *_top, *_front, *_back;
+    char *_bottom = nullptr;
+    char *_top = nullptr;
+    char *_front = nullptr;
+    char *_back = nullptr;
   };
 
   enum Known_caps {
