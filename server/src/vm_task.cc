@@ -8,6 +8,7 @@
 #include <l4/re/env>
 #include <l4/sigma0/sigma0.h>
 #include <l4/sys/cache.h>
+#include <l4/sys/platform_control.h>
 #include <string.h>
 
 #include "boot_fs.h"
@@ -167,11 +168,7 @@ Vm_task::load(cxx::String const &name, l4_addr_t *entry)
 Vm_task&
 Vm_task::set_asid(l4_umword_t asid)
 {
-#ifdef ENABLE_ONCE_API_HAS_SETTLED
-  if (l4_error(l4_task_set_asid(cap().cap(), asid)) < 0)
-#else
-  static_cast<void>(asid);
-#endif
+  if (l4_error(l4_platform_ctl_set_task_asid(L4_BASE_ICU_CAP, cap().cap(), asid)) < 0)
     Fatal().panic("Cannot set VMID.\n");
 
   return *this;
