@@ -25,6 +25,9 @@
 #define ENABLE_DEBUG
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+
 struct Fatal
 {
   static void L4_NORETURN panic(char const *msg);
@@ -78,6 +81,8 @@ struct Dbg
   { return 0; }
 #endif
 };
+
+#pragma GCC diagnostic pop
 
 void l4_debugger_set_object_name(l4_cap_idx_t cap, cxx::String const &name);
 void l4_debugger_add_image_info(l4_cap_idx_t cap, l4_addr_t base,
