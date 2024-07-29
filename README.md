@@ -121,7 +121,7 @@ virtual machine:
   required.
 * `irq VIRQ_NUM [HW_NUM]`: pass through hardware interrupt `HW_NUM` as guest
   vIRQ `VIRQ_NUM`. If `HW_NUM` is omitted, the hardware IRQ and vIRQ numbers
-  will have the same.
+  will be the same.
 * `irq-priorities MIN MAX`: provide the priority range for the guest vIRQ
   interrupt priorities. The numbers are given as L4Re thread priorities.
 * `load IMAGE`: load the ELF-file `IMAGE` into guest memory. This command
