@@ -19,8 +19,8 @@ Creator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
 PackageName: tinit
 SPDXID: SPDXRef-tinit
 PackageOriginator: Organization: Kernkonzept GmbH (info@kernkonzept.com)
-PackageLicenseDeclared: GPL-2.0-only
-PackageLicenseConcluded: GPL-2.0-only
+PackageLicenseDeclared: MIT
+PackageLicenseConcluded: MIT
 FilesAnalyzed: false
 PackageCopyrightText: NOASSERTION
 PackageDownloadLocation: NOASSERTION
