@@ -56,6 +56,9 @@ void free(void *)
 unsigned long heap_avail()
 { return __heap_end - heap_pos; }
 
+unsigned long heap_size()
+{ return __heap_end - __heap_start; }
+
 void *operator new(size_t sz) { return malloc(sz); }
 void operator delete(void *m) { free(m); }
 #if __cplusplus >= 201400

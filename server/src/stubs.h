@@ -8,3 +8,4 @@
 #pragma once
 
 unsigned long heap_avail() __attribute__((pure));
+unsigned long heap_size() __attribute__((const));

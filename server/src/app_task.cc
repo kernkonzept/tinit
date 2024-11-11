@@ -17,6 +17,8 @@
 #include "ex_regs_flags"
 #include "page_alloc.h"
 
+unsigned long App_task::_used_ram;
+
 void App_task::Stack::init(void *bottom, l4_size_t size)
 {
   _bottom = reinterpret_cast<char *>(bottom);
@@ -212,6 +214,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
             memcpy(reinterpret_cast<void *>(dest), src, ph.filesz());
             memset(reinterpret_cast<void *>(dest + ph.filesz()), 0,
                    size - ph.filesz());
+            _used_ram += size;
           }
 
         map_to_task(dest, dest, size, flags);

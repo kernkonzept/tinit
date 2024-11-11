@@ -138,6 +138,9 @@ public:
   static bool reserve_ram(cxx::String const &arg0, l4_addr_t reloc,
                           unsigned node);
 
+  static unsigned long used_ram()
+  { return _used_ram; }
+
 private:
   Stack _stack;
   L4::Cap<L4::Thread> _thread;
@@ -150,6 +153,7 @@ private:
   l4_umword_t _ex_regs_flags;
   unsigned char _num_phdrs;
   unsigned char _prio;
+  static unsigned long _used_ram;
 
   void push_named_cap(cxx::String const &name, L4::Cap<void> cap,
                       unsigned rights);

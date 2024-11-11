@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <l4/sys/kip>
 
 #include "app_task.h"
 #include "boot_fs.h"
@@ -723,6 +724,9 @@ static void parse_inittab()
     }
 }
 
+// Global variable with external linkage so that a debugger can read it.
+unsigned long used_ram;
+
 int main(int, char**)
 {
   Info().printf("Starting...\n");
@@ -752,7 +756,52 @@ int main(int, char**)
 
   parse_inittab();
   Page_alloc::dump();
-  Info().printf("Remaining heap: %lu\n", heap_avail());
+  Info().printf("Heap: %lu/%lu bytes free.\n", heap_avail(), heap_size());
+
+  unsigned long used_bootstrap = 0;
+  unsigned long used_kernel = 0;
+  unsigned long used_tinit = 0;
+  unsigned long used_apps = App_task::used_ram();
+
+  used_ram = App_task::used_ram();
+  for (auto const &md: L4::Kip::Mem_desc::all(l4_kip()))
+    {
+      if (md.is_virtual())
+        continue;
+
+      L4::Kip::Mem_desc::Mem_type type = md.type();
+
+      // Fully account partially reserved pages. Note that md.end() address is
+      // inclusive!
+      unsigned long start = l4_trunc_page(md.start());
+      unsigned long end = l4_round_page(md.end() + 1) - 1;
+      unsigned long size = end - start + 1;
+
+      switch (type)
+        {
+        case L4::Kip::Mem_desc::Reserved:
+          used_ram += size;
+          used_kernel += size;
+          break;
+        case L4::Kip::Mem_desc::Dedicated:
+          used_ram += size;
+          used_tinit += size;
+          break;
+        case L4::Kip::Mem_desc::Bootloader:
+          used_ram += size;
+          used_bootstrap += size;
+          break;
+        default:
+          continue;
+        }
+    }
+
+  Info().printf("System RAM usage: %lu KiB\n", used_ram / 1024);
+  Info().printf("  Bootstrap: %8lu KiB\n", used_bootstrap / 1024);
+  Info().printf("  Kernel:    %8lu KiB\n", used_kernel / 1024);
+  Info().printf("  Userspace: %8lu KiB\n", (used_tinit + used_apps) / 1024);
+  Info().printf("    tinit:   %8lu KiB\n", used_tinit / 1024);
+  Info().printf("    Apps:    %8lu KiB\n", used_apps / 1024);
 
   server.loop_noexc(&registry);
 
