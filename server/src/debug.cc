@@ -8,7 +8,6 @@
 #include <l4/sys/debugger.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "debug.h"
 

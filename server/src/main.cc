@@ -725,7 +725,7 @@ static void parse_inittab()
 
 int main(int, char**)
 {
-  Info().printf("TINIT: Starting...\n");
+  Info().printf("Starting...\n");
 
   L4Re::Env::env()->scheduler()
     ->run_thread(L4::Cap<L4::Thread>(L4_BASE_THREAD_CAP), l4_sched_param(0xff));

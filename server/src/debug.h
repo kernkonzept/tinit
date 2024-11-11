@@ -11,6 +11,7 @@
 #include <l4/sys/err.h>
 #include <l4/sys/types.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #if defined(CONFIG_TINIT_VERBOSITY_ERROR)
 #define ENABLE_ERRORS
@@ -35,7 +36,10 @@ struct Fatal
 #ifdef ENABLE_ERRORS
   template<typename... Args>
   int printf(char const *fmt, Args... args) const
-  { return dprintf(1, fmt, args...); }
+  {
+    ::write(1, "tinit: ", 7);
+    return dprintf(1, fmt, args...);
+  }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -48,7 +52,10 @@ struct Err
 #ifdef ENABLE_ERRORS
   template<typename... Args>
   int printf(char const *fmt, Args... args) const
-  { return dprintf(1, fmt, args...); }
+  {
+    ::write(1, "tinit: ", 7);
+    return dprintf(1, fmt, args...);
+  }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -61,7 +68,10 @@ struct Info
 #ifdef ENABLE_INFO
   template<typename... Args>
   int printf(char const *fmt, Args... args) const
-  { return dprintf(1, fmt, args...); }
+  {
+    ::write(1, "tinit: ", 7);
+    return dprintf(1, fmt, args...);
+  }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
@@ -74,7 +84,10 @@ struct Dbg
 #ifdef ENABLE_DEBUG
   template<typename... Args>
   int printf(char const *fmt, Args... args) const
-  { return dprintf(1, fmt, args...); }
+  {
+    ::write(1, "tinit: ", 7);
+    return dprintf(1, fmt, args...);
+  }
 #else
   int printf(char const * /*fmt*/, ...) const
     __attribute__((format(printf, 2, 3)))
