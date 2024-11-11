@@ -147,6 +147,7 @@ private:
   l4_fpage_t _utcb;
   l4_cap_idx_t _first_free_cap;
   l4_fpage_t _known_caps[Max_known_caps];
+  cxx::String const _arg0;
   l4re_env_cap_entry_t *_named_caps, *_named_caps_end;
   l4_umword_t _entry;
   l4_umword_t _phdrs;

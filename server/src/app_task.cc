@@ -135,6 +135,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
   _thread(Util::cap_alloc.alloc<L4::Thread>()),
   _utcb(l4_fpage(0, L4_PAGESHIFT + utcb_pages_order, 0)),
   _first_free_cap(Caps::First_free << L4_CAP_SHIFT),
+  _arg0(arg0),
   _phdrs(0), _ex_regs_flags(Default_ex_regs_flags), _prio(prio)
 {
   for (auto &i : _known_caps)
@@ -448,10 +449,9 @@ App_task::op_signal(L4Re::Parent::Rights, unsigned long sig, unsigned long val)
   switch (sig)
     {
     case 0: // exit
-        {
-          Fatal().printf("Task terminated w/ %lu\n", val);
-          return -L4_ENOREPLY;
-        }
+      Fatal().printf("Task '%.*s' terminated w/ %lu\n",
+                     _arg0.len(), _arg0.start(), val);
+      return -L4_ENOREPLY;
     default: break;
     }
   return L4_EOK;
