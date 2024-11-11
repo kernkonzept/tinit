@@ -803,6 +803,8 @@ int main(int, char**)
   Info().printf("    tinit:   %8lu KiB\n", used_tinit / 1024);
   Info().printf("    Apps:    %8lu KiB\n", used_apps / 1024);
 
+  App_task::check_tasks_ready();
+
   server.loop_noexc(&registry);
 
   return 0;

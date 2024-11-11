@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <l4/re/elf_aux.h>
 #include <l4/re/env>
+#include <l4/sys/kdump.h>
 #include <string.h>
 
 #include "app_task.h"
@@ -18,6 +19,8 @@
 #include "page_alloc.h"
 
 unsigned long App_task::_used_ram;
+unsigned char App_task::_started_tasks;
+unsigned char App_task::_ready_tasks;
 
 void App_task::Stack::init(void *bottom, l4_size_t size)
 {
@@ -403,6 +406,10 @@ void App_task::start()
   L4::Cap<L4::Scheduler> s(L4_BASE_SCHEDULER_CAP);
   s->run_thread(_thread, sched_param);
   _thread->ex_regs(_entry, sp, _ex_regs_flags);
+
+  // So far, only tvmm signals its readiness.
+  if (_arg0 == "tvmm")
+    _started_tasks++;
 }
 
 bool
@@ -452,7 +459,22 @@ App_task::op_signal(L4Re::Parent::Rights, unsigned long sig, unsigned long val)
       Fatal().printf("Task '%.*s' terminated w/ %lu\n",
                      _arg0.len(), _arg0.start(), val);
       return -L4_ENOREPLY;
+    case 1: // ready
+      Info().printf("Task '%.*s' is ready\n", _arg0.len(), _arg0.start());
+      _ready_tasks++;
+      if (_ready_tasks == _started_tasks)
+        dump_kernel_stats();
+      break;
     default: break;
     }
+
   return L4_EOK;
+}
+
+void
+App_task::dump_kernel_stats()
+{
+  Info().printf("Kernel memory stats:\n");
+  if (fiasco_dump_kmem_stats() < 0)
+    Info().printf("Not supported!\n");
 }

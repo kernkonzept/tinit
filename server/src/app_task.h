@@ -141,6 +141,13 @@ public:
   static unsigned long used_ram()
   { return _used_ram; }
 
+  static void check_tasks_ready()
+  {
+    // In case no tvmm was started, print now...
+    if (!_started_tasks)
+      dump_kernel_stats();
+  }
+
 private:
   Stack _stack;
   L4::Cap<L4::Thread> _thread;
@@ -155,12 +162,15 @@ private:
   unsigned char _num_phdrs;
   unsigned char _prio;
   static unsigned long _used_ram;
+  static unsigned char _started_tasks;
+  static unsigned char _ready_tasks;
 
   void push_named_cap(cxx::String const &name, L4::Cap<void> cap,
                       unsigned rights);
   void push_known_cap(Known_caps type, L4::Cap<void> cap, unsigned rights);
   static bool dynamic_reloc(Loader::Elf_binary &elf, l4_addr_t *reloc,
                             unsigned node);
+  static void dump_kernel_stats();
 
 public:
   // Implements L4Re::Parent
