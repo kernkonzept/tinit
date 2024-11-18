@@ -306,7 +306,7 @@ void Page_alloc::init()
         {
           // Fully cover partially reserved pages
           start = l4_trunc_page(md.start());
-          end = l4_round_page(md.end()) - 1;
+          end = l4_round_page(md.end() + 1) - 1;
         }
 
       if (type == L4::Kip::Mem_desc::Conventional)
@@ -366,7 +366,7 @@ bool Page_alloc::map_iomem(unsigned long address, unsigned long size)
         default:
           // Fully cover partially reserved pages
           md_start = l4_trunc_page(md.start());
-          md_end = l4_round_page(md.end()) - 1;
+          md_end = l4_round_page(md.end() + 1) - 1;
           break;
         }
 
