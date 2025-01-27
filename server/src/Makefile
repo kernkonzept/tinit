@@ -21,9 +21,8 @@ CAN_PIE_arm     := y
 CAN_PIE_arm64   := y
 BID_CAN_PIE      = $(CAN_PIE_$(ARCH))
 
-REQUIRES_LIBS  := libc_minimal libc_be_minimal_log_io l4re \
+REQUIRES_LIBS  := libc_minimal libc_be_minimal_log_io libc_minimal_l4re \
                   $(if $(CONFIG_TINIT_RUN_ROOTTASK),libsigma0)
-EXTRA_LIBS     := -ll4sys-direct
 DEFINES        += -DL4_CXX_NO_EXCEPTION_BACKTRACE -DL4_MINIMAL_LIBC -DL4_NO_RTTI
 LDFLAGS        += --entry=_real_start
 CXXFLAGS       += -fno-rtti -fno-exceptions
