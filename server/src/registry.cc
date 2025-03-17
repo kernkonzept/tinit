@@ -6,6 +6,7 @@
  */
 
 #include <l4/re/env>
+#include <l4/sys/thread>
 
 #include "cap_alloc.h"
 #include "registry.h"
