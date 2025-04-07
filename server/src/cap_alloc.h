@@ -19,7 +19,7 @@ struct Cap_alloc
   L4::Cap<T> alloc()
   {
     l4_cap_idx_t ret = _next_cap;
-    _next_cap += L4_CAP_SIZE;
+    _next_cap += L4_CAP_OFFSET;
     return L4::Cap<T>(ret);
   }
 
