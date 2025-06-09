@@ -61,6 +61,7 @@ config TINIT_MAP_DEBUG_CAP
 config TINIT_DYNAMIC_LOADER
 	bool "Dynamically choose child task load address"
 	depends on BID_PIE
+	default y
 	help
 	  Load child tasks to a dynamically chosen address.
 
