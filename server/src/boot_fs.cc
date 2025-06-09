@@ -63,8 +63,20 @@ char const *Boot_fs::find(cxx::String const &name, l4_size_t *size)
     = reinterpret_cast<l4util_l4mod_mod const *>(mbi->mods_addr);
   unsigned num_modules = mbi->mods_count;
 
-  for (unsigned mod = 2; mod < num_modules; ++mod)
+  for (unsigned mod = 0; mod < num_modules; ++mod)
     {
+      // Modules for boot task, root pager and kernel must not be used. Their
+      // regions have been released by bootstrap. They are only retained to
+      // pass the respective command lines to user space.
+      switch (modules[mod].flags & L4util_l4mod_mod_flag_mask)
+        {
+        case L4util_l4mod_mod_flag_roottask:
+        case L4util_l4mod_mod_flag_sigma0:
+        case L4util_l4mod_mod_flag_kernel:
+          continue;
+        default: break;
+        }
+
       cxx::String opts;
       cxx::String mod_name
         = cmdline_to_name(reinterpret_cast<char const *>(modules[mod].cmdline));
