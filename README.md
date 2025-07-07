@@ -189,8 +189,9 @@ choose a free location by itself.
 modules.list:
 
 ```
-entry quadcore
-sigma0[nodes=0:1:2:3] tinit
+entry[no-defaults] quadcore
+kernel fiasco
+sigma0 tinit
 module hello
 module inittab
 ```
@@ -207,6 +208,10 @@ end
 start hello node:3 reloc:0x60000
 end
 ```
+
+If `CONFIG_TINIT_DYNAMIC_LOADER` is enabled, there is no need to specify an
+explicit relocation. It is recommended to enable this option and leave out all
+`reloc:` options.
 
 # Documentation
 
