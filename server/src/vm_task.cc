@@ -111,6 +111,11 @@ Vm_task::map_ram(l4_addr_t base, l4_size_t size, l4_addr_t off)
 
   map_to_task(base, base, size);
 
+  // If the read-writable window (load region) is at a different address, give
+  // the VM access too. It will need it whenever it needs to modify itself.
+  if (off)
+    map_to_task(base + off, base + off, size);
+
   _ram.add(base, size, off);
 
   return *this;
