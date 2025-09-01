@@ -445,6 +445,7 @@ App_task::reserve_ram(cxx::String const &arg0, l4_addr_t reloc, unsigned node)
 
 #ifdef CONFIG_TINIT_DYNAMIC_LOADER
         static_cast<void>(f);
+        static_cast<void>(ret);
 #else
         char const *src = reinterpret_cast<char const *>(f) + ph.offset();
         if ((ph.flags() & PF_W) || ph.memsz() > ph.filesz()
