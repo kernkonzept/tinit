@@ -759,7 +759,7 @@ int main(int, char**)
   Info().printf("Heap: %lu/%lu bytes free.\n", heap_avail(), heap_size());
 
   unsigned long used_bootstrap = 0;
-  unsigned long used_kernel = 0;
+  unsigned long used_kernel_image = 0, used_kernel_heap = 0;
   unsigned long used_tinit = 0;
   unsigned long used_apps = App_task::used_ram();
 
@@ -780,8 +780,14 @@ int main(int, char**)
       switch (type)
         {
         case L4::Kip::Mem_desc::Reserved:
+          if (md.sub_type() == L4::Kip::Mem_desc::Reserved_kernel)
+            used_kernel_image += size;
+          else if (md.sub_type() == L4::Kip::Mem_desc::Reserved_heap)
+            used_kernel_heap += size;
+          else
+            break; // Mem_desc::Reserved_mmio or completely unknown
+
           used_ram += size;
-          used_kernel += size;
           break;
         case L4::Kip::Mem_desc::Dedicated:
           used_ram += size;
@@ -798,7 +804,9 @@ int main(int, char**)
 
   Info().printf("System RAM usage: %lu KiB\n", used_ram / 1024);
   Info().printf("  Bootstrap: %8lu KiB\n", used_bootstrap / 1024);
-  Info().printf("  Kernel:    %8lu KiB\n", used_kernel / 1024);
+  Info().printf("  Kernel:    %8lu KiB\n", (used_kernel_image + used_kernel_heap) / 1024);
+  Info().printf("    Image:   %8lu KiB\n", used_kernel_image / 1024);
+  Info().printf("    Heap:    %8lu KiB\n", used_kernel_heap / 1024);
   Info().printf("  Userspace: %8lu KiB\n", (used_tinit + used_apps) / 1024);
   Info().printf("    tinit:   %8lu KiB\n", used_tinit / 1024);
   Info().printf("    Apps:    %8lu KiB\n", used_apps / 1024);
