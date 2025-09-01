@@ -106,13 +106,16 @@ bool App_task::dynamic_reloc(Loader::Elf_binary &elf, l4_addr_t *reloc,
     if (start < task_min)
       task_min = start;
 
-    l4_addr_t end = start + l4_round_page(ph.memsz());
+    l4_addr_t end = start + ph.memsz();
     if (end > task_max)
       task_max = end;
 
     if (ph.align() > task_align)
       task_align = ph.align();
   });
+
+  task_min = task_min                    & (task_align - 1);
+  task_max = (task_max + task_align - 1) & (task_align - 1);
 
   l4_addr_t base = Page_alloc::alloc_ram(task_max - task_min, task_align, node);
   if (!base)
@@ -184,7 +187,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
     if (ph.type() == PT_LOAD)
       {
         l4_addr_t dest = ph.paddr() + reloc;
-        l4_addr_t size = l4_round_page(ph.memsz());
+        l4_addr_t size = ph.memsz();
         if (!size)
           return;
 
@@ -193,6 +196,11 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
           flags |= L4_FPAGE_W;
         if (ph.flags() & PF_X)
           flags |= L4_FPAGE_X;
+
+        // Round to full pages for mapping. Load sections do not necessarily
+        // need to be aligned!
+        l4_addr_t map_dest = l4_trunc_page(dest);
+        l4_addr_t map_size = l4_round_page(size + dest - map_dest);
 
         if (!(flags & L4_FPAGE_W) && ph.memsz() <= ph.filesz()
             && src == reinterpret_cast<char const *>(dest))
@@ -218,10 +226,10 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
             memcpy(reinterpret_cast<void *>(dest), src, ph.filesz());
             memset(reinterpret_cast<void *>(dest + ph.filesz()), 0,
                    size - ph.filesz());
-            _used_ram += size;
+            _used_ram += map_size;
           }
 
-        map_to_task(dest, dest, size, flags);
+        map_to_task(map_dest, map_dest, map_size, flags);
       }
     else if (ph.type() == PT_PHDR)
       _phdrs = ph.paddr() + reloc;
