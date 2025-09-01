@@ -216,7 +216,7 @@ App_task::App_task(My_registry *registry, cxx::String const &arg0,
                 Fatal fatal;
                 fatal.printf("Failed to load ELF kernel binary. "
                              "Region [0x%lx/0x%lx] not available.\n",
-                             ph.paddr(), size);
+                             dest, size);
                 fatal.panic("Cannot load app section\n");
               }
 #endif
