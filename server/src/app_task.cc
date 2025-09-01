@@ -435,15 +435,17 @@ App_task::reserve_ram(cxx::String const &arg0, l4_addr_t reloc, unsigned node)
     return false;
 
   bool ret = true;
-#ifndef CONFIG_TINIT_DYNAMIC_LOADER
   elf.iterate_phdr([reloc, &ret](Loader::Elf_phdr ph, void const *f) {
     if (ph.type() == PT_LOAD)
       {
         l4_addr_t dest = ph.paddr() + reloc;
-        l4_addr_t size = l4_round_page(ph.memsz());
+        l4_addr_t size = ph.memsz();
         if (!size)
           return;
 
+#ifdef CONFIG_TINIT_DYNAMIC_LOADER
+        static_cast<void>(f);
+#else
         char const *src = reinterpret_cast<char const *>(f) + ph.offset();
         if ((ph.flags() & PF_W) || ph.memsz() > ph.filesz()
             || src != reinterpret_cast<char const *>(dest))
@@ -451,9 +453,11 @@ App_task::reserve_ram(cxx::String const &arg0, l4_addr_t reloc, unsigned node)
             if (!Page_alloc::reserve_ram(dest, size))
               ret = false;
           }
+#endif
+
+        _used_ram += l4_round_page(size + (dest & ~L4_PAGEMASK));
       }
   });
-#endif
 
   return ret;
 }
