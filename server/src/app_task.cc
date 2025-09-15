@@ -401,10 +401,10 @@ void App_task::start()
     Fatal().panic("map cap failed\n");
 #endif
 
-  // The main thread is it's own pager. Thus it will halt on a page fault!
+  // We're the main thread's pager and exception handler.
   L4::Thread::Attr th_attr;
-  th_attr.pager(env->main_thread());
-  th_attr.exc_handler(env->main_thread());
+  th_attr.pager(env->parent());
+  th_attr.exc_handler(env->parent());
   th_attr.bind(reinterpret_cast<l4_utcb_t*>(l4_fpage_memaddr(_utcb)), _task);
   if (l4_error(_thread->control(th_attr)) < 0)
     Fatal().panic("thread control failed\n");
@@ -482,6 +482,31 @@ App_task::op_signal(L4Re::Parent::Rights, unsigned long sig, unsigned long val)
     }
 
   return L4_EOK;
+}
+
+int
+App_task::op_exception(L4::Exception::Rights, l4_exc_regs_t &regs,
+                       L4::Ipc::Opt<L4::Ipc::Snd_fpage> &)
+{
+  Fatal().printf("Task '%.*s': unhandled exception PC=0x%lx PFA=0x%lx ERR=0x%lx\n",
+                 _arg0.len(), _arg0.start(), regs.pc, regs.pfa, regs.err);
+  return -L4_ENOREPLY;
+}
+
+int
+App_task::op_page_fault(L4::Pager::Rights, l4_umword_t addr, l4_umword_t pc,
+                        L4::Ipc::Opt<L4::Ipc::Snd_fpage> &)
+{
+  Fatal().printf("Task '%.*s': unhandled page fault PC=0x%lx PFA=0x%lx\n",
+                 _arg0.len(), _arg0.start(), pc, addr);
+  return -L4_ENOREPLY;
+}
+
+int
+App_task::op_io_page_fault(L4::Io_pager::Rights, l4_fpage_t, l4_umword_t,
+                           L4::Ipc::Opt<L4::Ipc::Snd_fpage> &)
+{
+  return -L4_ENOREPLY;  // Cannot happen on Arm platforms
 }
 
 void

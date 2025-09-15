@@ -11,6 +11,8 @@
 #include <l4/re/parent>
 #include <l4/sys/capability>
 #include <l4/sys/cxx/ipc_epiface>
+#include <l4/sys/exception>
+#include <l4/sys/pager>
 #include <l4/sys/scheduler>
 #include <l4/sys/thread>
 #include <l4/sys/vcon>
@@ -18,8 +20,10 @@
 #include "loader.h"
 #include "registry.h"
 
+using App_protocols = L4::Kobject_3t<void, L4::Pager, L4::Exception, L4Re::Parent>;
+
 class App_task :
-  public L4::Epiface_t<App_task, L4Re::Parent>,
+  public L4::Epiface_t<App_task, App_protocols>,
   public Loader::Child_task
 {
   class Stack
@@ -175,4 +179,15 @@ private:
 public:
   // Implements L4Re::Parent
   int op_signal(L4Re::Parent::Rights, unsigned long, unsigned long);
+
+  // Implements L4::Exception
+  int op_exception(L4::Exception::Rights, l4_exc_regs_t &regs,
+                   L4::Ipc::Opt<L4::Ipc::Snd_fpage> &fp);
+
+  // Implements L4::Pager
+  int op_page_fault(L4::Pager::Rights rights, l4_umword_t addr, l4_umword_t pc,
+                    L4::Ipc::Opt<L4::Ipc::Snd_fpage> &fp);
+
+  int op_io_page_fault(L4::Io_pager::Rights, l4_fpage_t, l4_umword_t,
+                       L4::Ipc::Opt<L4::Ipc::Snd_fpage> &);
 };
