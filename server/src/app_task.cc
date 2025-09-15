@@ -114,8 +114,8 @@ bool App_task::dynamic_reloc(Loader::Elf_binary &elf, l4_addr_t *reloc,
       task_align = ph.align();
   });
 
-  task_min = task_min                    & (task_align - 1);
-  task_max = (task_max + task_align - 1) & (task_align - 1);
+  task_min = task_min                    & ~(task_align - 1);
+  task_max = (task_max + task_align - 1) & ~(task_align - 1);
 
   l4_addr_t base = Page_alloc::alloc_ram(task_max - task_min, task_align, node);
   if (!base)
