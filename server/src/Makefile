@@ -23,7 +23,7 @@ BID_CAN_PIE      = $(CAN_PIE_$(ARCH))
 
 REQUIRES_LIBS  := libc_minimal libc_be_minimal_log_io libc_minimal_l4re \
                   $(if $(CONFIG_TINIT_RUN_ROOTTASK),libsigma0)
-DEFINES        += -DL4_CXX_NO_EXCEPTION_BACKTRACE -DL4_MINIMAL_LIBC -DL4_NO_RTTI
+DEFINES        += -DL4_CXX_NO_EXCEPTION_BACKTRACE -DL4_MINIMAL_LIBC
 LDFLAGS        += --entry=_real_start
 CXXFLAGS       += -fno-rtti -fno-exceptions
 
