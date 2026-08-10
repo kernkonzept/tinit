@@ -323,6 +323,7 @@ void App_task::start()
   env->main_thread(L4::Cap<L4::Thread>(Caps::Rm_thread_cap << L4_CAP_SHIFT));
   env->factory(L4::Cap<L4::Factory>(Caps::Factory_cap << L4_CAP_SHIFT));
   env->first_free_cap(_first_free_cap >> L4_CAP_SHIFT);
+  env->first_free_reply_cap(0);
   env->utcb_area(_utcb);
   env->first_free_utcb(l4_fpage_memaddr(_utcb) + L4_UTCB_OFFSET);
   env->initial_caps(_stack.relocate(caps));
