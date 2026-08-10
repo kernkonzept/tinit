@@ -156,7 +156,8 @@ private:
   Stack _stack;
   L4::Cap<L4::Thread> _thread;
   l4_fpage_t _utcb;
-  l4_cap_idx_t _first_free_cap;
+  l4_cap_idx_t _first_free_cap;  ///< Future value of L4Re::Env::first_free_cap(),
+                                 ///< however, shifted by #L4_CAP_SHIFT.
   l4_fpage_t _known_caps[Max_known_caps];
   cxx::String const _arg0;
   l4re_env_cap_entry_t *_named_caps, *_named_caps_end;
